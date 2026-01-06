@@ -6,37 +6,11 @@ pipeline {
         }
     }
     stages {
-        stage('1- Build Code') {
+        stage('1- Build') { steps { sh 'mvn clean compile' } }
+        stage('2- Test') {
             steps {
-                sh 'mvn clean compile'
-            }
-        }
-        stage('2- Unit Tests') {
-            steps {
-                // Sadece Unit testleri çalıştır, Selenium testlerini ayır
-                sh 'mvn test -Dtest=*Test,!*IntegrationTest,!*SelectionTest,!*ApprovalTest,!*ListTest'
-            }
-            post {
-                always {
-                    junit '**/target/surefire-reports/*.xml'
-                }
-            }
-        }
-        stage('3- Integration Tests') {
-            steps {
-                sh 'mvn test -Dtest=*IntegrationTest'
-            }
-        }
-        stage('4- System Tests (Selenium)') {
-            steps {
-                // PORT 8081 üzerinden çalıştırarak çakışmayı önle
-                sh 'mvn spring-boot:start -Dspring-boot.run.arguments="--server.port=8081"'
-                sh 'mvn test -Dtest=*SelectionTest,*ApprovalTest,*ListTest -Dserver.port=8081'
-            }
-            post {
-                always {
-                    sh 'mvn spring-boot:stop'
-                }
+                // server.port=0 sayesinde boş port bulur, 8080 ile kavga etmez
+                sh 'mvn test -Dserver.port=0'
             }
         }
     }
