@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Result</title>
+</head>
+<body>
+
+<h2>Enrollment Result</h2>
+
+<ul>
+    <li th:each="r : ${results}"
+        th:text="${r.courseCode + ' - ' + r.status}">
+    </li>
+</ul>
+
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Enrollments</title>
+</head>
+<body>
+
+<h2>My Enrollments</h2>
+
+<input id="studentNumber"/>
+<button id="getBtn" onclick="load()">Get</button>
+
+<ul id="list"></ul>
+
+<script>
+    function load() {
+        fetch("/students/" + document.getElementById("studentNumber").value + "/enrollments")
+            .then(r => r.json())
+            .then(d => {
+                document.getElementById("list").innerHTML = "";
+                d.forEach(e => {
+                    let li = document.createElement("li");
+                    li.innerText = e.courseCode + " - " + e.status;
+                    document.getElementById("list").appendChild(li);
+                });
+            });
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Course Selection</title>
+</head>
+<body>
+
+<h2>Course Selection</h2>
+
+<form method="post" action="/ui/course-selection">
+    <label>Student Number:</label>
+    <input type="text" name="studentNumber" id="studentNumber"/><br/>
+
+    <label>Course Codes (comma separated):</label>
+    <input type="text" name="courseCodes" id="courseCodes"/><br/>
+
+    <button type="submit" id="submitBtn">Submit</button>
+</form>
+
+</body>
+</html>

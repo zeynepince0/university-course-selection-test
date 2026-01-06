@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Advisor Panel</title>
+</head>
+<body>
+
+<h2>Advisor Decision</h2>
+
+<label>Enrollment ID:</label>
+<input id="enrollmentId"/>
+
+<select id="decision">
+    <option value="APPROVE">APPROVE</option>
+    <option value="REJECT">REJECT</option>
+</select>
+
+<button id="decisionBtn" onclick="decide()">Submit</button>
+
+<div id="result"></div>
+
+<script>
+    function decide() {
+        fetch("/advisors/decision", {
+            method: "POST",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify({
+                enrollmentId: document.getElementById("enrollmentId").value,
+                decision: document.getElementById("decision").value
+            })
+        })
+            .then(r => r.json())
+            .then(d => document.getElementById("result").innerText = d.status);
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Course Selection</title>
+</head>
+<body>
+
+<h2>Student Course Selection</h2>
+
+<label>Student Number:</label>
+<input id="studentNumber"/>
+
+<label>Course Codes (comma separated):</label>
+<input id="courses"/>
+
+<button id="selectBtn" onclick="submit()">Select Courses</button>
+
+<div id="result"></div>
+
+<script>
+    function submit() {
+        fetch("/students/courses", {
+            method: "POST",
+            headers: {"Content-Type":"application/json"},
+            body: JSON.stringify({
+                studentNumber: document.getElementById("studentNumber").value,
+                courseCodes: document.getElementById("courses").value.split(",")
+            })
+        })
+            .then(r => r.json())
+            .then(d => document.getElementById("result").innerText = "Selected");
+    }
+</script>
+
+</body>
+</html>
