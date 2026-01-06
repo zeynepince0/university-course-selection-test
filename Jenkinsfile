@@ -9,12 +9,11 @@ pipeline {
         stage('1. Kod Çekme & Build') {
             steps {
                 sh 'mvn clean compile'
-                echo 'Kaynak kodlar başarıyla build edildi.'
+                echo ' Kaynak kodlar başarıyla build edildi.'
 
         }
         stage('2. Birim Testleri') {
             steps {
-                // Hata almamak için: Eğer test bulamazsa hata verme ayarı eklendi
                 sh 'mvn test -Dtest=com.example.course.unit.* -Dsurefire.failIfNoSpecifiedTests=false'
                 echo ' Birim testleri tamamlandı ve rapor hazırlandı.'
             }
@@ -25,7 +24,6 @@ pipeline {
                 echo ' Entegrasyon testleri tamamlandı ve rapor hazırlandı.'
             }
         }
-        // Hoca her Selenium senaryosu için ayrı stage olabilir dediği için:
         stage('4. Selenium: Ders Seçimi') {
             steps {
                 sh 'mvn test -Dtest=StudentCourseSelectionTest -Dserver.port=0 -Dsurefire.failIfNoSpecifiedTests=false'
@@ -35,7 +33,7 @@ pipeline {
         stage('5. Selenium: Danışman Onayı') {
             steps {
                 sh 'mvn test -Dtest=AdvisorApprovalTest -Dserver.port=0 -Dsurefire.failIfNoSpecifiedTests=false'
-                echo 'Selenium: Danışman onay süreci başarıyla test edildi.'
+                echo ' Selenium: Danışman onay süreci başarıyla test edildi.'
             }
         }
         stage('6. Selenium: Liste Görüntüleme') {
@@ -47,9 +45,8 @@ pipeline {
     }
     post {
         always {
-            // Test sonuçlarını Jenkins arayüzündeki grafiklere taşır
             junit '**/target/surefire-reports/*.xml'
-            echo ' Tüm CI/CD süreçleri tamamlandı. Raporlar "Test Result" sekmesindedir.'
+            echo ' Tüm CI/CD süreçleri tamamlandı. Raporlar hazır.'
         }
     }
 }
