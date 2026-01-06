@@ -43,8 +43,7 @@ class AdvisorApprovalTest {
 
     @Test
     void advisor_approves_enrollment() {
-        driver.get("http://localhost:8080/advisor.html");
-
+        driver.get("http://localhost:" + port + "/advisor.html");
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
         // SQL'den gelen ID=1 kaydını bekle

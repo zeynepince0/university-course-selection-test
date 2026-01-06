@@ -42,7 +42,7 @@ class EnrollmentListTest {
 
     @Test
     void student_views_enrollments() {
-        driver.get("http://localhost:8080/enrollments.html");
+        driver.get("http://localhost:" + port + "/enrollments.html");
 
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("studentNumber")));

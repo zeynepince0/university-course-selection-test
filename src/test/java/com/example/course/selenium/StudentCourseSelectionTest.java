@@ -43,8 +43,7 @@ class StudentCourseSelectionTest {
     @Test
     void student_selects_course() {
         System.out.println("DEBUG: Sayfa açılıyor...");
-        driver.get("http://localhost:8080/student.html");
-
+        driver.get("http://localhost:" + port + "/student.html");
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
         // HATA AYIKLAMA BLOĞU
