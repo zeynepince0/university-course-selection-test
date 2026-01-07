@@ -16,7 +16,7 @@ public class DtoSerializationTest {
 
     @Test
     void departmentDto_serializes() throws Exception {
-        DepartmentDto dto = new DepartmentDto(2L, "D1", "Department 1");
+        DepartmentDto dto = new DepartmentDto(1L, "D1", "Department 1");
         String json = objectMapper.writeValueAsString(dto);
         assertTrue(json.contains("D1"));
         DepartmentDto read = objectMapper.readValue(json, DepartmentDto.class);
@@ -55,7 +55,7 @@ public class DtoSerializationTest {
     void semesterDto_serializes() throws Exception {
         SemesterDto dto = new SemesterDto(2L, "2027-1");
         String json = objectMapper.writeValueAsString(dto);
-        SemesterDto dto2 = objectMapper.readValue(json, SemesterDto.class);
-        assertEquals(dto.getName(), dto2.getName());
+        SemesterDto dto1 = objectMapper.readValue(json, SemesterDto.class);
+        assertEquals(dto.getName(), dto1.getName());
     }
 }
