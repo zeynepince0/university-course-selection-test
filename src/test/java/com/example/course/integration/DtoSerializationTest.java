@@ -16,7 +16,7 @@ public class DtoSerializationTest {
 
     @Test
     void departmentDto_serializes() throws Exception {
-        DepartmentDto dto = new DepartmentDto(1L, "D1", "Department 1");
+        DepartmentDto dto = new DepartmentDto(2L, "D1", "Department 1");
         String json = objectMapper.writeValueAsString(dto);
         assertTrue(json.contains("D1"));
         DepartmentDto read = objectMapper.readValue(json, DepartmentDto.class);
