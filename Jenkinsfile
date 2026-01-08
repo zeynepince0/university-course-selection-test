@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     tools {
-        maven 'maven'
         jdk 'jdk'
+        maven 'maven'
     }
 
     stages {
@@ -17,38 +17,25 @@ pipeline {
         stage('🐳 Start Backend Container') {
             steps {
                 bat 'docker-compose up -d --build'
-                sleep(time: 15, unit: 'SECONDS')
+                sleep 15
             }
         }
 
         stage('🧪 Unit Tests') {
             steps {
-                bat '''
-                  mvn test ^
-                  -Dtest=com.example.course.unit.* ^
-                  -Dsurefire.failIfNoSpecifiedTests=false
-                '''
+                bat 'mvn test -Dtest=*Test'
             }
         }
 
         stage('🧪 Integration Tests') {
             steps {
-                bat '''
-                  mvn test ^
-                  -Dtest=com.example.course.integration.* ^
-                  -Dsurefire.failIfNoSpecifiedTests=false
-                '''
+                bat 'mvn test -Dtest=*IT'
             }
         }
 
         stage('🌐 Selenium Tests') {
             steps {
-                bat '''
-                  mvn test ^
-                  -Dtest=com.example.course.selenium.* ^
-                  -Dserver.port=8082 ^
-                  -Dsurefire.failIfNoSpecifiedTests=false
-                '''
+                bat 'mvn test -Dtest=*E2ETest -Dserver.port=8082'
             }
         }
     }
@@ -56,10 +43,13 @@ pipeline {
     post {
         always {
             bat 'docker-compose down'
-            junit '**/target/surefire-reports/*.xml'
+            junit 'target/surefire-reports/*.xml'
         }
         success {
-            echo '✅ Pipeline tamamen başarılı!'
+            echo '✅ Pipeline SUCCESS'
+        }
+        failure {
+            echo '❌ Pipeline FAILED'
         }
     }
 }

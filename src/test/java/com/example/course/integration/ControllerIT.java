@@ -27,7 +27,7 @@ import static org.hamcrest.Matchers.*;
 @AutoConfigureMockMvc
 @Transactional
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-public class ControllerIntegrationTest {
+public class ControllerIT {
 
     @Autowired MockMvc mockMvc;
     @Autowired ObjectMapper objectMapper;

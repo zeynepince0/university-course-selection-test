@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
-public class DepartmentServiceIntegrationTest {
+public class DepartmentServiceIT {
 
     @Autowired DepartmentService departmentService;
     @Autowired DepartmentRepository departmentRepository;

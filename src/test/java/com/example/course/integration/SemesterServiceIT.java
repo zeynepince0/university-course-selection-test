@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
-public class SemesterServiceIntegrationTest {
+public class SemesterServiceIT {
 
     @Autowired SemesterService semesterService;
     @Autowired SemesterRepository semesterRepository;

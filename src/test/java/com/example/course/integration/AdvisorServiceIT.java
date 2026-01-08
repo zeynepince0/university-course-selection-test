@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
-public class AdvisorServiceIntegrationTest {
+public class AdvisorServiceIT {
 
     @Autowired AdvisorService advisorService;
     @Autowired EnrollmentRepository enrollmentRepository;

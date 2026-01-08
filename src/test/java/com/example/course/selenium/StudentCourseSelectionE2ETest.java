@@ -8,7 +8,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -22,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Sql(scripts = "classpath:test-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-class AdvisorApprovalTest {
+class StudentCourseSelectionE2ETest {
     @LocalServerPort
     private int port;
 
@@ -31,7 +30,7 @@ class AdvisorApprovalTest {
     @BeforeEach
     void setup() {
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("--headless=new");
+        options.addArguments("--headless=new"); // Arka planda çalışır
         options.addArguments("--remote-allow-origins=*");
         options.addArguments("--disable-search-engine-choice-screen");
         options.addArguments("--no-sandbox");
@@ -41,23 +40,41 @@ class AdvisorApprovalTest {
         driver = new ChromeDriver(options);
     }
 
+
+
+
     @Test
-    void advisor_approves_enrollment() {
-        driver.get("http://app:8082/advisor.html");
+    void student_selects_course() {
+        System.out.println("DEBUG: Sayfa açılıyor...");
+        driver.get("http://app:8082/student.html");
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
-        // SQL'den gelen ID=1 kaydını bekle
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("enrollmentId")));
+        // HATA AYIKLAMA BLOĞU
+        try {
+            // studentNumber kutusunu bekle
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("studentNumber")));
+        } catch (Exception e) {
+            System.out.println("\n❌ HATA! 'studentNumber' elementi bulunamadı.");
+            System.out.println("Selenium şu an bu sayfayı görüyor:");
+            System.out.println("======================================");
+            System.out.println(driver.getPageSource()); // HTML KODUNU KONSOLA BAS
+            System.out.println("======================================\n");
+            throw e; // Testi durdur
+        }
 
-        driver.findElement(By.id("enrollmentId")).sendKeys("1");
+        // Eğer element bulunduysa işleme devam et
+        driver.findElement(By.id("studentNumber")).sendKeys("202012345");
 
-        Select decisionDropdown = new Select(driver.findElement(By.id("decision")));
-        decisionDropdown.selectByVisibleText("APPROVE");
+        // CSE102 dersini seç
+        driver.findElement(By.id("courses")).sendKeys("CSE102");
 
-        wait.until(ExpectedConditions.elementToBeClickable(By.id("decisionBtn"))).click();
+        // Butona tıkla
+        driver.findElement(By.id("selectBtn")).click();
 
-        wait.until(ExpectedConditions.textToBePresentInElementLocated(By.tagName("body"), "APPROVED"));
-        assertTrue(driver.getPageSource().contains("APPROVED"));
+        // Sonucu bekle
+        wait.until(ExpectedConditions.textToBePresentInElementLocated(By.id("result"), "Selected"));
+
+        assertTrue(driver.getPageSource().contains("Selected"));
     }
 
     @AfterEach

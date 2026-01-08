@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
-public class RepositoryIntegrationTest {
+public class RepositoryIT {
 
     @Autowired DepartmentRepository departmentRepository;
     @Autowired CourseRepository courseRepository;

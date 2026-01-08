@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Sql(scripts = "classpath:test-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-class StudentCourseSelectionTest {
+class EnrollmentListE2ETest {
     @LocalServerPort
     private int port;
 
@@ -30,7 +30,7 @@ class StudentCourseSelectionTest {
     @BeforeEach
     void setup() {
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("--headless=new"); // Arka planda çalışır
+        options.addArguments("--headless=new");
         options.addArguments("--remote-allow-origins=*");
         options.addArguments("--disable-search-engine-choice-screen");
         options.addArguments("--no-sandbox");
@@ -43,38 +43,25 @@ class StudentCourseSelectionTest {
 
 
 
+
+
+
+
+
     @Test
-    void student_selects_course() {
-        System.out.println("DEBUG: Sayfa açılıyor...");
-        driver.get("http://app:8082/student.html");
+    void student_views_enrollments() {
+        driver.get("http://app:8082/enrollments.html");
+
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("studentNumber")));
 
-        // HATA AYIKLAMA BLOĞU
-        try {
-            // studentNumber kutusunu bekle
-            wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("studentNumber")));
-        } catch (Exception e) {
-            System.out.println("\n❌ HATA! 'studentNumber' elementi bulunamadı.");
-            System.out.println("Selenium şu an bu sayfayı görüyor:");
-            System.out.println("======================================");
-            System.out.println(driver.getPageSource()); // HTML KODUNU KONSOLA BAS
-            System.out.println("======================================\n");
-            throw e; // Testi durdur
-        }
-
-        // Eğer element bulunduysa işleme devam et
         driver.findElement(By.id("studentNumber")).sendKeys("202012345");
 
-        // CSE102 dersini seç
-        driver.findElement(By.id("courses")).sendKeys("CSE102");
+        wait.until(ExpectedConditions.elementToBeClickable(By.id("getBtn"))).click();
 
-        // Butona tıkla
-        driver.findElement(By.id("selectBtn")).click();
-
-        // Sonucu bekle
-        wait.until(ExpectedConditions.textToBePresentInElementLocated(By.id("result"), "Selected"));
-
-        assertTrue(driver.getPageSource().contains("Selected"));
+        // SQL'deki CSE101 dersinin ekranda belirmesini bekle
+        wait.until(ExpectedConditions.textToBePresentInElementLocated(By.tagName("body"), "CSE101"));
+        assertTrue(driver.getPageSource().contains("CSE101"));
     }
 
     @AfterEach

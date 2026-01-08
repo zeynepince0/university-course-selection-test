@@ -8,6 +8,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -21,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Sql(scripts = "classpath:test-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-class EnrollmentListTest {
+class AdvisorApprovalE2ETest {
     @LocalServerPort
     private int port;
 
@@ -40,28 +41,23 @@ class EnrollmentListTest {
         driver = new ChromeDriver(options);
     }
 
-
-
-
-
-
-
-
-
     @Test
-    void student_views_enrollments() {
-        driver.get("http://app:8082/enrollments.html");
-
+    void advisor_approves_enrollment() {
+        driver.get("http://app:8082/advisor.html");
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("studentNumber")));
 
-        driver.findElement(By.id("studentNumber")).sendKeys("202012345");
+        // SQL'den gelen ID=1 kaydını bekle
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("enrollmentId")));
 
-        wait.until(ExpectedConditions.elementToBeClickable(By.id("getBtn"))).click();
+        driver.findElement(By.id("enrollmentId")).sendKeys("1");
 
-        // SQL'deki CSE101 dersinin ekranda belirmesini bekle
-        wait.until(ExpectedConditions.textToBePresentInElementLocated(By.tagName("body"), "CSE101"));
-        assertTrue(driver.getPageSource().contains("CSE101"));
+        Select decisionDropdown = new Select(driver.findElement(By.id("decision")));
+        decisionDropdown.selectByVisibleText("APPROVE");
+
+        wait.until(ExpectedConditions.elementToBeClickable(By.id("decisionBtn"))).click();
+
+        wait.until(ExpectedConditions.textToBePresentInElementLocated(By.tagName("body"), "APPROVED"));
+        assertTrue(driver.getPageSource().contains("APPROVED"));
     }
 
     @AfterEach
