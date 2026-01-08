@@ -1,7 +1,6 @@
 services:
-  test-runner:
+  backend:
     build: .
-    container_name: course-test-runner
-    volumes:
-      - .:/workspace
-    working_dir: /workspace
+    container_name: course-backend
+    ports:
+      - "8082:8082"

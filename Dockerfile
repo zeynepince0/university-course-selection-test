@@ -1,9 +1,7 @@
-FROM markhobson/maven-chrome:jdk-21
+FROM eclipse-temurin:21-jre
 
-WORKDIR /workspace
+WORKDIR /app
+COPY target/*.jar app.jar
 
-COPY pom.xml .
-COPY src ./src
-
-# target container içinde oluşacak
-RUN mvn -q -DskipTests dependency:go-offline
+EXPOSE 8082
+ENTRYPOINT ["java", "-jar", "app.jar", "--server.port=8082"]
