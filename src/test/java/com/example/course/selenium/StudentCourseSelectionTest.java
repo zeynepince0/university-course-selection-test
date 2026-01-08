@@ -40,6 +40,9 @@ class StudentCourseSelectionTest {
         driver = new ChromeDriver(options);
     }
 
+
+
+
     @Test
     void student_selects_course() {
         System.out.println("DEBUG: Sayfa açılıyor...");
