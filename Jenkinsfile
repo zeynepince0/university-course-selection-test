@@ -35,7 +35,7 @@ pipeline {
 
         stage('🌐 Selenium Tests') {
             steps {
-                bat 'mvn test -Dtest=*E2ETest -Dserver.port=8082'
+                bat 'mvn test -Dtest=*E2E -Dserver.port=8082'
             }
         }
     }
