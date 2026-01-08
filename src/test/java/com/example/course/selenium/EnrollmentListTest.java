@@ -40,6 +40,10 @@ class EnrollmentListTest {
         driver = new ChromeDriver(options);
     }
 
+
+
+
+
     @Test
     void student_views_enrollments() {
         driver.get("http://localhost:" + port + "/enrollments.html");
