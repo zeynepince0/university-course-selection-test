@@ -42,4 +42,23 @@ class PrequisiteValidationTest {
         assertThrows(IllegalStateException.class,
                 () -> validation.validate(new Course(), List.of(cp), List.of()));
     }
+    @Test
+    void differentCourseCompleted_notEnough_throws() {
+        Course prereq = new Course();
+        prereq.setId(1L);
+
+        Course other = new Course();
+        other.setId(2L);
+
+        CoursePrerequisite cp = new CoursePrerequisite();
+        cp.setPrerequisiteCourse(prereq);
+
+        Enrollment e = new Enrollment();
+        e.setCourse(other);
+        e.setStatus(EnrollmentStatus.APPROVED);
+
+        assertThrows(IllegalStateException.class,
+                () -> validation.validate(new Course(), List.of(cp), List.of(e)));
+    }
+
 }

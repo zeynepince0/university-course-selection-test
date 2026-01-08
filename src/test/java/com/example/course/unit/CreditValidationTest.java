@@ -1,6 +1,7 @@
 package com.example.course.unit;
 
 import com.example.course.entity.Course;
+import com.example.course.entity.Enrollment;
 import com.example.course.entity.Student;
 import com.example.course.validation.CreditValidation;
 import org.junit.jupiter.api.Test;
@@ -36,4 +37,22 @@ class CreditValidationTest {
         assertThrows(IllegalStateException.class,
                 () -> validation.validate(s, List.of(c), List.of()));
     }
+    @Test
+    void existingCreditsIncluded_throws() {
+        Student s = new Student();
+        s.setMaxCredit(10);
+
+        Course oldCourse = new Course();
+        oldCourse.setCredit(7);
+
+        Enrollment e = new Enrollment();
+        e.setCourse(oldCourse);
+
+        Course newCourse = new Course();
+        newCourse.setCredit(4);
+
+        assertThrows(IllegalStateException.class,
+                () -> validation.validate(s, List.of(newCourse), List.of(e)));
+    }
+
 }

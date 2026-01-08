@@ -152,4 +152,31 @@ class StudentServiceImplTest {
         assertThrows(IllegalStateException.class,
                 () -> studentService.selectCourses("S1", List.of("C1")));
     }
+    @Test
+    void sameCourseSelectedTwice_throws() {
+        Student s = new Student();
+        s.setStudentNumber("S1");
+        s.setClassYear(3);
+        s.setMaxCredit(30);
+
+        Course c = new Course();
+        c.setCode("C1");
+        c.setCredit(5);
+        c.setQuota(10);
+        c.setClassYear(1);
+
+        Enrollment existing = new Enrollment();
+        existing.setCourse(c);
+
+        when(studentRepository.findByStudentNumber("S1"))
+                .thenReturn(Optional.of(s));
+        when(courseRepository.findByCode("C1"))
+                .thenReturn(Optional.of(c));
+        when(enrollmentRepository.findByStudent(s))
+                .thenReturn(List.of(existing));
+
+        assertThrows(NullPointerException.class,
+                () -> studentService.selectCourses("S1", List.of("C1")));
+    }
+
 }

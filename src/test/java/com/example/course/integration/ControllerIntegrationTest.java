@@ -103,4 +103,51 @@ public class ControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name", is("2026-1")));
     }
+    @Test
+    void advisorDecision_invalidDecision_400() throws Exception {
+        Department d = new Department(); d.setName("CS"); departmentRepository.save(d);
+
+        Course c = new Course();
+        c.setCode("CS101"); c.setName("Algo"); c.setCredit(3); c.setDepartment(d);
+        courseRepository.save(c);
+
+        Student s = new Student();
+        s.setStudentNumber("STU1");
+        studentRepository.save(s);
+
+        Semester sem = new Semester();
+        sem.setName("2025-1");
+        semesterRepository.save(sem);
+
+        Enrollment e = new Enrollment();
+        e.setCourse(c);
+        e.setStudent(s);
+        e.setSemester(sem);
+        e.setStatus(EnrollmentStatus.PENDING);
+        e.setCreatedAt(LocalDateTime.now());
+        enrollmentRepository.save(e);
+
+        AdvisorDecisionRequest req = new AdvisorDecisionRequest();
+        req.setEnrollmentId(e.getId());
+        req.setDecision("XXX");
+
+        mockMvc.perform(post("/advisors/decision")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void selectCourse_studentNotFound_404() throws Exception {
+        CourseSelectionRequest req = new CourseSelectionRequest();
+        req.setStudentNumber("XXX");
+        req.setCourseCodes(List.of("C1"));
+
+        mockMvc.perform(post("/students/courses")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isNotFound());
+    }
+
+
 }
