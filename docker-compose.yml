@@ -1,19 +1,7 @@
-version: "3.9"
-
 services:
-  app:
-    container_name: university-selection-app
+  test-runner:
     build: .
-    ports:
-      - "8082:8082"
-    networks:
-      - course-net
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-networks:
-  course-net:
-    driver: bridge
+    container_name: course-test-runner
+    volumes:
+      - .:/workspace
+    working_dir: /workspace

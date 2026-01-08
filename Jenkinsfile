@@ -1,62 +1,77 @@
 pipeline {
     agent any
 
-    tools {
-        jdk 'jdk'
-        maven 'maven'
-    }
-
     stages {
 
-        stage('1️⃣ Build Docker Image') {
+        stage('🐳 Build Test Image') {
             steps {
-                echo '📦 Docker image build ediliyor...'
+                echo 'Docker test image build ediliyor'
                 bat 'docker-compose build'
             }
         }
 
-        stage('2️⃣ Unit & Integration Tests') {
+        stage('🧪 Unit Tests') {
             steps {
-                echo '🧪 Unit + Integration testleri çalışıyor...'
+                echo 'Unit testleri container içinde çalışıyor'
                 bat '''
-                  mvn test ^
-                  -Dtest=com.example.course.unit.*,com.example.course.integration.* ^
-                  -Dsurefire.failIfNoSpecifiedTests=false
+                docker-compose run --rm test-runner ^
+                mvn test ^
+                -Dtest=com.example.course.unit.*Test ^
+                -Dsurefire.failIfNoSpecifiedTests=false
                 '''
+            }
+            post {
+                always {
+                    junit allowEmptyResults: true, testResults: '**/target/surefire-reports/*.xml'
+                }
             }
         }
 
-        stage('3️⃣ Start App Container') {
+        stage('🧪 Integration Tests') {
             steps {
-                echo '🚀 Uygulama Docker’da ayağa kalkıyor...'
-                bat 'docker-compose up -d'
-                sleep(time: 15, unit: 'SECONDS')
+                echo 'Integration testleri container içinde çalışıyor'
+                bat '''
+                docker-compose run --rm test-runner ^
+                mvn test ^
+                -Dtest=com.example.course.integration.*Test ^
+                -Dsurefire.failIfNoSpecifiedTests=false
+                '''
+            }
+            post {
+                always {
+                    junit allowEmptyResults: true, testResults: '**/target/surefire-reports/*.xml'
+                }
             }
         }
 
-        stage('4️⃣ Selenium Tests (Local Chrome)') {
+        stage('🌐 Selenium Tests') {
             steps {
-                echo '🌐 Selenium testleri çalışıyor (local Chrome)...'
+                echo 'Selenium testleri container içinde çalışıyor'
                 bat '''
-                  mvn test ^
-                  -Dtest=com.example.course.selenium.* ^
-                  -Dsurefire.failIfNoSpecifiedTests=false
+                docker-compose run --rm test-runner ^
+                mvn test ^
+                -Dtest=com.example.course.selenium.*Test ^
+                -Dsurefire.failIfNoSpecifiedTests=false
                 '''
+            }
+            post {
+                always {
+                    junit allowEmptyResults: true, testResults: '**/target/surefire-reports/*.xml'
+                }
             }
         }
     }
 
     post {
         always {
-            echo '🧹 Temizlik yapılıyor...'
+            echo 'Temizlik'
             bat 'docker-compose down'
-            junit '**/target/surefire-reports/*.xml'
         }
         success {
-            echo '✅ SUCCESS: Pipeline tamamen başarılı!'
+            echo '✅ Tüm testler başarıyla tamamlandı'
         }
         failure {
-            echo '❌ FAILURE: Pipeline hata aldı.'
+            echo '❌ Pipeline hata aldı'
         }
     }
 }
