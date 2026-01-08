@@ -1,57 +1,58 @@
 pipeline {
-    agent {
-        docker {
-            image 'markhobson/maven-chrome:jdk-21'
-            args '-v /root/.m2:/root/.m2'
-        }
+    agent any
+
+    tools {
+        jdk 'jdk'    // Jenkins Global Tool Configuration ismin
+        maven 'maven' // Jenkins Global Tool Configuration ismin
     }
+
     stages {
-        stage('1. Kod Çekme & Build') {
+        stage('1. Build & Containerize') {
             steps {
-                sh 'mvn clean compile'
-                echo ' Adım 1 Tamamlandı: Kaynak kodlar başarıyla çekildi ve build edildi.'
+                echo '📦 Docker imajı build ediliyor...'
+                sh 'docker-compose build'
             }
         }
-        stage('2. Birim Testleri') {
+
+        stage('2. Unit & Integration Tests') {
             steps {
-                // Sadece unit paketindeki testleri çalıştırır
-                sh 'mvn test -Dtest=com.example.course.unit.* -Dsurefire.failIfNoSpecifiedTests=false'
-                echo ' Adım 2 Tamamlandı: Birim testleri başarıyla sonuçlandı.'
+                echo '🧪 İç testler (Unit/Integration) koşuyor...'
+                // Bunları doğrudan Jenkins üzerindeki Maven ile yapabiliriz
+                sh 'mvn test -Dtest=com.example.course.unit.*,com.example.course.integration.* -Dsurefire.failIfNoSpecifiedTests=false'
             }
         }
-        stage('3. Entegrasyon Testleri') {
+
+        stage('3. Deploy App (Container)') {
             steps {
-                // Sadece integration paketindeki testleri çalıştırır
-                sh 'mvn test -Dtest=com.example.course.integration.* -Dsurefire.failIfNoSpecifiedTests=false'
-                echo ' Adım 3 Tamamlandı: Entegrasyon testleri başarıyla sonuçlandı.'
+                echo '🚀 Uygulama test için başlatılıyor...'
+                sh 'docker-compose up -d'
+                // Uygulamanın tamamen hazır olması için bekle
+                sleep 15
             }
         }
-        stage('4. Selenium: Ders Seçimi') {
-            steps {
-                sh 'mvn test -Dtest=StudentCourseSelectionTest -Dserver.port=0 -Dsurefire.failIfNoSpecifiedTests=false'
-                echo 'Adım 4 Tamamlandı: Öğrenci ders seçimi senaryosu test edildi.'
+
+        stage('4. Selenium Tests (Inside Docker Container)') {
+            agent {
+                docker {
+                    image 'markhobson/maven-chrome:jdk-21'
+                    args '--network host' // Hosttaki konteynera erişebilmek için
+                }
             }
-        }
-        stage('5. Selenium: Danışman Onayı') {
             steps {
-                sh 'mvn test -Dtest=AdvisorApprovalTest -Dserver.port=0 -Dsurefire.failIfNoSpecifiedTests=false'
-                echo ' Adım 5 Tamamlandı: Danışman onay süreci test edildi.'
-            }
-        }
-        stage('6. Selenium: Liste Görüntüleme') {
-            steps {
-                sh 'mvn test -Dtest=EnrollmentListTest -Dserver.port=0 -Dsurefire.failIfNoSpecifiedTests=false'
-                echo ' Adım 6 Tamamlandı: Kayıt listeleme senaryosu test edildi.'
+                echo '🌐 Selenium senaryoları Docker içinden koşuyor...'
+                sh 'mvn test -Dtest=com.example.course.selenium.* -Dserver.port=8082 -Dsurefire.failIfNoSpecifiedTests=false'
             }
         }
     }
+
     post {
         always {
-            // TÜM test raporlarını (Unit + Integration + Selenium) toplu olarak Jenkins arayüzüne aktarır
+            echo '🧹 Temizlik yapılıyor...'
+            sh 'docker-compose down'
             junit '**/target/surefire-reports/*.xml'
-            echo ' CI/CD Süreci Final Raporu: Tüm testler raporlandı ve Jenkins paneline aktarıldı.'
+        }
+        success {
+            echo '✅ SUCCESS: Tüm testler konteyner ortamında başarıyla tamamlandı!'
         }
     }
 }
-
-

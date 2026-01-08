@@ -1,14 +1,13 @@
-# 1. Aşama: Build (Hem Java hem Chrome olan özel bir imaj kullanıyoruz)
-# Bu sayede testler Docker içinde çalışırken "Chrome bulunamadı" hatası almayacak.
+# 1. Aşama: Build (Lokalde Maven hızlandırmak için)
 FROM markhobson/maven-chrome:jdk-21 AS build
 WORKDIR /app
 COPY pom.xml .
 COPY src ./src
-# Projeyi derle ve testleri çalıştırarak paketi oluştur
-RUN mvn clean package -DskipTests=false
+# Testleri burada koşturmuyoruz, Jenkins içindeki stage'lerde koşturacağız
+RUN mvn clean package -DskipTests=true
 
-# 2. Aşama: Çalıştırma (Run)
-FROM openjdk:21-jdk-slim
+# 2. Aşama: Çalıştırma
+FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8082
