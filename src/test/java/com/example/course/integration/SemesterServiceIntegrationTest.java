@@ -34,3 +34,9 @@ public class SemesterServiceIntegrationTest {
         assertTrue(all.stream().anyMatch(s -> "2030-1".equals(s.getName())));
     }
 }
+
+
+
+
+
+
