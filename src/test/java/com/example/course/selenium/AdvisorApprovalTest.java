@@ -60,10 +60,6 @@ class AdvisorApprovalTest {
         assertTrue(driver.getPageSource().contains("APPROVED"));
     }
 
-
-
-
-
     @AfterEach
     void tearDown() {
         if (driver != null) driver.quit();
