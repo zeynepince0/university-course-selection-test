@@ -44,6 +44,10 @@ class EnrollmentListTest {
 
 
 
+
+
+
+
     @Test
     void student_views_enrollments() {
         driver.get("http://localhost:" + port + "/enrollments.html");
