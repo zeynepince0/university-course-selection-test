@@ -8,44 +8,43 @@ pipeline {
 
     stages {
 
-        stage('1️⃣ Build & Containerize') {
+        stage('1️⃣ Build Docker Image') {
             steps {
                 echo '📦 Docker image build ediliyor...'
-                sh 'docker-compose build'
+                bat 'docker-compose build'
             }
         }
 
         stage('2️⃣ Unit & Integration Tests') {
             steps {
                 echo '🧪 Unit + Integration testleri çalışıyor...'
-                sh '''
-                  mvn test \
-                  -Dtest=com.example.course.unit.*,com.example.course.integration.* \
+                bat '''
+                  mvn test ^
+                  -Dtest=com.example.course.unit.*,com.example.course.integration.* ^
                   -Dsurefire.failIfNoSpecifiedTests=false
                 '''
             }
         }
 
-        stage('3️⃣ Deploy App (Docker)') {
+        stage('3️⃣ Start App Container') {
             steps {
-                echo '🚀 Uygulama container olarak ayağa kalkıyor...'
-                sh 'docker-compose up -d'
-                sleep 15
+                echo '🚀 Uygulama ayağa kaldırılıyor...'
+                bat 'docker-compose up -d'
+                sleep(time: 15, unit: 'SECONDS')
             }
         }
 
-        stage('4️⃣ Selenium Tests') {
-            agent {
-                docker {
-                    image 'markhobson/maven-chrome:jdk-21'
-                    args '--network course-net'
-                }
-            }
+        stage('4️⃣ Selenium Tests (Docker)') {
             steps {
                 echo '🌐 Selenium testleri çalışıyor...'
-                sh '''
-                  mvn test \
-                  -Dtest=com.example.course.selenium.* \
+                bat '''
+                  docker run --rm ^
+                  --network host ^
+                  -v "%cd%":/workspace ^
+                  -w /workspace ^
+                  markhobson/maven-chrome:jdk-21 ^
+                  mvn test ^
+                  -Dtest=com.example.course.selenium.* ^
                   -Dsurefire.failIfNoSpecifiedTests=false
                 '''
             }
@@ -55,11 +54,11 @@ pipeline {
     post {
         always {
             echo '🧹 Temizlik yapılıyor...'
-            sh 'docker-compose down'
+            bat 'docker-compose down'
             junit '**/target/surefire-reports/*.xml'
         }
         success {
-            echo '✅ SUCCESS: Tüm testler başarıyla geçti!'
+            echo '✅ SUCCESS: CI/CD pipeline başarıyla tamamlandı!'
         }
         failure {
             echo '❌ FAILURE: Pipeline hata aldı.'
