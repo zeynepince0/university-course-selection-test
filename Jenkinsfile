@@ -2,45 +2,52 @@ pipeline {
     agent any
 
     tools {
-        jdk 'jdk'    // Jenkins Global Tool Configuration ismin
-        maven 'maven' // Jenkins Global Tool Configuration ismin
+        jdk 'jdk'
+        maven 'maven'
     }
 
     stages {
-        stage('1. Build & Containerize') {
+
+        stage('1️⃣ Build & Containerize') {
             steps {
-                echo '📦 Docker imajı build ediliyor...'
+                echo '📦 Docker image build ediliyor...'
                 sh 'docker-compose build'
             }
         }
 
-        stage('2. Unit & Integration Tests') {
+        stage('2️⃣ Unit & Integration Tests') {
             steps {
-                echo '🧪 İç testler (Unit/Integration) koşuyor...'
-                // Bunları doğrudan Jenkins üzerindeki Maven ile yapabiliriz
-                sh 'mvn test -Dtest=com.example.course.unit.*,com.example.course.integration.* -Dsurefire.failIfNoSpecifiedTests=false'
+                echo '🧪 Unit + Integration testleri çalışıyor...'
+                sh '''
+                  mvn test \
+                  -Dtest=com.example.course.unit.*,com.example.course.integration.* \
+                  -Dsurefire.failIfNoSpecifiedTests=false
+                '''
             }
         }
 
-        stage('3. Deploy App (Container)') {
+        stage('3️⃣ Deploy App (Docker)') {
             steps {
-                echo '🚀 Uygulama test için başlatılıyor...'
+                echo '🚀 Uygulama container olarak ayağa kalkıyor...'
                 sh 'docker-compose up -d'
-                // Uygulamanın tamamen hazır olması için bekle
                 sleep 15
             }
         }
 
-        stage('4. Selenium Tests (Inside Docker Container)') {
+        stage('4️⃣ Selenium Tests') {
             agent {
                 docker {
                     image 'markhobson/maven-chrome:jdk-21'
-                    args '--network host' // Hosttaki konteynera erişebilmek için
+                    args '--network course-net'
                 }
             }
             steps {
-                echo '🌐 Selenium senaryoları Docker içinden koşuyor...'
-                sh 'mvn test -Dtest=com.example.course.selenium.* -Dserver.port=8082 -Dsurefire.failIfNoSpecifiedTests=false'
+                echo '🌐 Selenium testleri çalışıyor...'
+                sh '''
+                  mvn test \
+                  -Dtest=com.example.course.selenium.* \
+                  -Dsurefire.failIfNoSpecifiedTests=false
+                '''
             }
         }
     }
@@ -52,7 +59,10 @@ pipeline {
             junit '**/target/surefire-reports/*.xml'
         }
         success {
-            echo '✅ SUCCESS: Tüm testler konteyner ortamında başarıyla tamamlandı!'
+            echo '✅ SUCCESS: Tüm testler başarıyla geçti!'
+        }
+        failure {
+            echo '❌ FAILURE: Pipeline hata aldı.'
         }
     }
 }
