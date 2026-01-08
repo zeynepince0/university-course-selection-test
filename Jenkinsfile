@@ -28,21 +28,16 @@ pipeline {
 
         stage('3️⃣ Start App Container') {
             steps {
-                echo '🚀 Uygulama ayağa kaldırılıyor...'
+                echo '🚀 Uygulama Docker’da ayağa kalkıyor...'
                 bat 'docker-compose up -d'
                 sleep(time: 15, unit: 'SECONDS')
             }
         }
 
-        stage('4️⃣ Selenium Tests (Docker)') {
+        stage('4️⃣ Selenium Tests (Local Chrome)') {
             steps {
-                echo '🌐 Selenium testleri çalışıyor...'
+                echo '🌐 Selenium testleri çalışıyor (local Chrome)...'
                 bat '''
-                  docker run --rm ^
-                  --network host ^
-                  -v "%cd%":/workspace ^
-                  -w /workspace ^
-                  markhobson/maven-chrome:jdk-21 ^
                   mvn test ^
                   -Dtest=com.example.course.selenium.* ^
                   -Dsurefire.failIfNoSpecifiedTests=false
@@ -58,7 +53,7 @@ pipeline {
             junit '**/target/surefire-reports/*.xml'
         }
         success {
-            echo '✅ SUCCESS: CI/CD pipeline başarıyla tamamlandı!'
+            echo '✅ SUCCESS: Pipeline tamamen başarılı!'
         }
         failure {
             echo '❌ FAILURE: Pipeline hata aldı.'
