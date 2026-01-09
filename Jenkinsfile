@@ -8,32 +8,32 @@ pipeline {
 
     stages {
 
-        stage('📦 Build Backend') {
+        stage(' Build Backend') {
             steps {
                 bat 'mvn clean package -DskipTests'
             }
         }
 
-        stage('🐳 Start Backend Container') {
+        stage(' Start Backend Container') {
             steps {
                 bat 'docker-compose up -d --build'
                 sleep 15
             }
         }
 
-        stage('🧪 Unit Tests') {
+        stage(' Unit Tests') {
             steps {
                 bat 'mvn test -Dtest=*Test'
             }
         }
 
-        stage('🧪 Integration Tests') {
+        stage(' Integration Tests') {
             steps {
                 bat 'mvn test -Dtest=*IT'
             }
         }
 
-        stage('🌐 Selenium Tests') {
+        stage(' Selenium Tests') {
             steps {
                 bat 'mvn test -Dtest=*E2E -Dserver.port=8082'
             }
@@ -46,10 +46,10 @@ pipeline {
             junit 'target/surefire-reports/*.xml'
         }
         success {
-            echo '✅ Pipeline SUCCESS'
+            echo ' Pipeline SUCCESS'
         }
         failure {
-            echo '❌ Pipeline FAILED'
+            echo 'Pipeline FAILED'
         }
     }
 }

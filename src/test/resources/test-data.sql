@@ -17,3 +17,14 @@ ALTER TABLE courses ALTER COLUMN id RESTART WITH 100;
 ALTER TABLE students ALTER COLUMN id RESTART WITH 100;
 ALTER TABLE semesters ALTER COLUMN id RESTART WITH 100;
 ALTER TABLE departments ALTER COLUMN id RESTART WITH 100;
+
+INSERT INTO courses (id, code, name, credit, quota, class_year, department_id)
+VALUES (3, 'CSE401', 'Advanced CS', 5, 50, 4, 1);
+
+
+INSERT INTO courses (id, code, name, credit, quota, class_year, department_id)
+VALUES (4, 'CREDIT999', 'Heavy Course', 40, 50, 1, 1);
+
+
+INSERT INTO courses (id, code, name, credit, quota, class_year, department_id)
+VALUES (5, 'FULL101', 'Full Course', 5, 0, 1, 1);

@@ -10,25 +10,47 @@
 <label>Student Number:</label>
 <input id="studentNumber"/>
 
+<br/><br/>
+
 <label>Course Codes (comma separated):</label>
 <input id="courses"/>
 
+<br/><br/>
+
 <button id="selectBtn" onclick="submit()">Select Courses</button>
+
+<br/><br/>
 
 <div id="result"></div>
 
 <script>
     function submit() {
+        const resultDiv = document.getElementById("result");
+        resultDiv.innerText = "Processing...";
+
         fetch("/students/courses", {
             method: "POST",
-            headers: {"Content-Type":"application/json"},
+            headers: {"Content-Type": "application/json"},
             body: JSON.stringify({
                 studentNumber: document.getElementById("studentNumber").value,
-                courseCodes: document.getElementById("courses").value.split(",")
+                courseCodes: document.getElementById("courses").value
+                    .split(",")
+                    .map(s => s.trim())
             })
         })
-            .then(r => r.json())
-            .then(d => document.getElementById("result").innerText = "Selected");
+            .then(async response => {
+                const text = await response.text();
+                if (!response.ok) {
+                    throw new Error(text);
+                }
+                return text;
+            })
+            .then(() => {
+                resultDiv.innerText = "Selected";
+            })
+            .catch(error => {
+                resultDiv.innerText = error.message;
+            });
     }
 </script>
 

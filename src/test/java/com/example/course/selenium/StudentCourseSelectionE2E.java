@@ -1,17 +1,11 @@
 package com.example.course.selenium;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
+import org.junit.jupiter.api.*;
+import org.openqa.selenium.*;
+import org.openqa.selenium.chrome.*;
+import org.openqa.selenium.support.ui.*;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
 
 import java.time.Duration;
@@ -19,61 +13,79 @@ import java.time.Duration;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Sql(scripts = "classpath:test-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@Sql(scripts = "classpath:test-data.sql",
+        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class StudentCourseSelectionE2E {
+
     @LocalServerPort
-    private int port;
+    int port;
 
     WebDriver driver;
+    WebDriverWait wait;
 
     @BeforeEach
     void setup() {
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("--headless=new"); // Arka planda çalışır
-        options.addArguments("--remote-allow-origins=*");
-        options.addArguments("--disable-search-engine-choice-screen");
-        options.addArguments("--no-sandbox");
-        options.addArguments("--disable-dev-shm-usage");
-        options.addArguments("--window-size=1920,1080");
-
+        options.addArguments("--headless=new", "--no-sandbox", "--disable-dev-shm-usage");
         driver = new ChromeDriver(options);
+        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
     }
 
+    private void openPage() {
+        driver.get("http://localhost:" + port + "/student.html");
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("studentNumber")));
+    }
 
-
+    private String submit(String studentNo, String course) {
+        driver.findElement(By.id("studentNumber")).sendKeys(studentNo);
+        driver.findElement(By.id("courses")).sendKeys(course);
+        driver.findElement(By.id("selectBtn")).click();
+        wait.until(ExpectedConditions.not(
+                ExpectedConditions.textToBe(By.id("result"), "Processing...")
+        ));
+        return driver.findElement(By.id("result")).getText();
+    }
 
     @Test
-    void student_selects_course() {
-        driver.get("http://localhost:" + port + "/student.html");
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+    void student_not_found() {
+        openPage();
+        String result = submit("0000000", "CSE101");
+        assertTrue(result.contains("Student not found"));
+    }
 
-        // HATA AYIKLAMA BLOĞU
-        try {
-            // studentNumber kutusunu bekle
-            wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("studentNumber")));
-        } catch (Exception e) {
-            System.out.println("\n❌ HATA! 'studentNumber' elementi bulunamadı.");
-            System.out.println("Selenium şu an bu sayfayı görüyor:");
-            System.out.println("======================================");
-            System.out.println(driver.getPageSource()); // HTML KODUNU KONSOLA BAS
-            System.out.println("======================================\n");
-            throw e; // Testi durdur
-        }
+    @Test
+    void course_not_found() {
+        openPage();
+        String result = submit("202012345", "ERROR404");
+        assertTrue(result.contains("Course not found"));
+    }
 
-        // Eğer element bulunduysa işleme devam et
-        driver.findElement(By.id("studentNumber")).sendKeys("202012345");
+    @Test
+    void class_year_not_sufficient() {
+        openPage();
+        String result = submit("202012345", "CSE401");
+        assertTrue(result.contains("Class year not sufficient"));
+    }
 
-        // CSE102 dersini seç
-        driver.findElement(By.id("courses")).sendKeys("CSE102");
+    @Test
+    void credit_limit_exceeded() {
+        openPage();
+        String result = submit("202012345", "CREDIT999");
+        assertTrue(result.contains("Credit limit exceeded"));
+    }
 
-        // Butona tıkla
-        driver.findElement(By.id("selectBtn")).click();
+    @Test
+    void quota_full() {
+        openPage();
+        String result = submit("202012345", "FULL101");
+        assertTrue(result.contains("Course quota full"));
+    }
 
-        // Sonucu bekle
-        wait.until(ExpectedConditions.textToBePresentInElementLocated(By.id("result"), "Selected"));
-
-        assertTrue(driver.getPageSource().contains("Selected"));
+    @Test
+    void successful_selection() {
+        openPage();
+        String result = submit("202012345", "CSE102");
+        assertTrue(result.contains("Selected"));
     }
 
     @AfterEach
